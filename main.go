@@ -4,13 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 	"go-app/pkg/adapters"
+	"go-app/pkg/adapters/middleware"
 	"go-app/pkg/infra"
 	"log"
 	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/labstack/echo"
+	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
 )
 
 func open(path string, count uint) *sql.DB {
@@ -40,12 +42,24 @@ func main() {
 	db := connectDB()
 	defer db.Close()
 
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	e := echo.New()
+
+	jWTMiddleware := middleware.JWTMiddleware(os.Getenv("jwtSecretKey"))
 
 	userRepo := infra.NewUserRepository(db)
 	userHandler := &adapters.UserHandler{UserRepo: userRepo}
 
 	e.POST("/register", userHandler.Register)
 	e.POST("/login", userHandler.Login)
+
+	authorized := e.Group("")
+	authorized.Use(jWTMiddleware)
+	authorized.GET("/test", userHandler.ProtectedEndpoint)
+
 	e.Start(":" + "8080")
 }

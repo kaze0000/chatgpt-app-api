@@ -5,10 +5,10 @@ import (
 	"go-app/pkg/domain"
 	"time"
 
-	"github.com/form3tech-oss/jwt-go"
+	"github.com/golang-jwt/jwt"
 )
 
-const jwtExpireDuration = 24 * 60 * 60
+const jwtExpireDuration = 24 * 60 * 60 * time.Second
 
 type JWTClaims struct {
 	UserID int `json:"user_id"`

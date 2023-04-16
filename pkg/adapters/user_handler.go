@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type UserHandler struct {
@@ -47,4 +48,15 @@ func (h *UserHandler) Login(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, token)
+}
+
+func (h *UserHandler) ProtectedEndpoint(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*usecase.JWTClaims) // userは、認証済みのユーザーに関する情報を持つ *jwt.Token 型の変数
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "認証に成功しました",
+		"user_id": claims.UserID,
+		"name":    claims.Name,
+	})
 }
