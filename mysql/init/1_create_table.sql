@@ -10,4 +10,21 @@ CREATE TABLE users (
   PRIMARY KEY (`id`)
 );
 
+DROP TABLE IF EXISTS messages;
+CREATE TABLE messages (
+  id         INT AUTO_INCREMENT NOT NULL,
+  content    VARCHAR(100) NOT NULL,
+  user_id    INT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME,
+  PRIMARY KEY (`id`)
+);
 
+DROP TABLE IF EXISTS responses;
+CREATE TABLE responses (
+  id         INT AUTO_INCREMENT NOT NULL,
+  content    VARCHAR(100) NOT NULL,
+  message_id    INT NOT NULL,
+  PRIMARY KEY (`id`)
+);

@@ -57,9 +57,17 @@ func main() {
 	e.POST("/register", userHandler.Register)
 	e.POST("/login", userHandler.Login)
 
+	// authorized
 	authorized := e.Group("")
 	authorized.Use(jWTMiddleware)
 	authorized.GET("/test", userHandler.ProtectedEndpoint)
+
+	// messge
+	chatGPTAPI := infra.NewChatGPTAPI(os.Getenv("chatGPTAPIKey"))
+
+	messageRepo := infra.NewMessageRepository(db)
+	messageHandler := &adapters.MessageHandler{Repo: messageRepo, ChatGPTAPI: chatGPTAPI}
+	e.POST("/message", messageHandler.SendAndReceiveMessage)
 
 	e.Start(":" + "8080")
 }
