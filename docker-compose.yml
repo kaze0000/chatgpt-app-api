@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: go-multistage
+    image: go-app
     tty: true
     ports:
       - 8080:8080
