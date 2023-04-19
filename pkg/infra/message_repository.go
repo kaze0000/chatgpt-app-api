@@ -37,3 +37,33 @@ func (r *messageRepository) StoreResponse(res *domain.Response) error {
 
 	return err
 }
+
+func (r *messageRepository) GetMessagesByUserID(userID int) ([]*domain.Message, error) {
+	rows, err := r.db.Query("SELECT id, content, user_id FROM messages WHERE user_id = ?", userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	messages := []*domain.Message{}
+	for rows.Next() {
+		message := &domain.Message{}
+		err := rows.Scan(&message.ID, &message.Content, &message.UserID)
+		if err != nil {
+			return nil, err
+		}
+		messages = append(messages, message)
+	}
+	return messages, nil
+}
+
+func (r *messageRepository) GetResponseByMessageID(messageID int) (*domain.Response, error) {
+	row := r.db.QueryRow("SELECT id, message_id, content FROM responses WHERE message_id = ?", messageID)
+
+	response := &domain.Response{}
+	err := row.Scan(&response.ID, &response.MessageID, &response.Content)
+	if  err != nil {
+		return nil, err
+	}
+	return response, nil
+}

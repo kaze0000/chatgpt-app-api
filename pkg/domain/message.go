@@ -3,12 +3,12 @@ package domain
 type Message struct {
 	ID        int    `json:"id"`
 	Content   string `json:"content"`
-	UserID		string    `json:"user_id"`
+	UserID		int    `json:"user_id"`
 }
 
 type Response struct {
 	ID        int    `json:"id"`
-	MessageID int    `json:"message_id"`
+	MessageID int `json:"message_id"`
 	Content   string `json:"content"`
 }
 
@@ -18,4 +18,6 @@ type MessageRepository interface {
 	// TODO: 必要あれば実装する
 	// GetMessages() ([]*Message, error)
 	// GetResponses(messageID int) ([]*Response, error)
+	GetMessagesByUserID(userID int) ([]*Message, error)
+	GetResponseByMessageID(messageID int) (*Response, error)
 }

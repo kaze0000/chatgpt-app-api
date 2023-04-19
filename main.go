@@ -67,7 +67,8 @@ func main() {
 
 	messageRepo := infra.NewMessageRepository(db)
 	messageHandler := &adapters.MessageHandler{Repo: messageRepo, ChatGPTAPI: chatGPTAPI}
-	e.POST("/message", messageHandler.SendAndReceiveMessage)
+	e.POST("/message", messageHandler.SendMessageAndSaveResponse)
+	e.GET("/user/:id/messages", messageHandler.GetMessagesAndResponseByUserID)
 
 	e.Start(":" + "8080")
 }
