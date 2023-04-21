@@ -78,3 +78,14 @@ func (r *messageRepository) UpdateMessageContent(messageID int, content string) 
 	_, err = stmt.Exec(content, messageID)
 	return err
 }
+
+func (r *messageRepository) DeleteMessage(messageID int) error {
+	stmt, err := r.db.Prepare("DELETE FROM messages WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(messageID)
+	return err
+}

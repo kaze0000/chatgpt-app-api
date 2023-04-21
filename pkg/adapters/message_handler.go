@@ -94,3 +94,17 @@ func (h *MessageHandler) UpdateMessageContent(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "メッセージの内容が更新されました"})
 }
+
+func (h *MessageHandler) DeleteMessage(c echo.Context) error {
+	params := c.Param
+	messageID, err := strconv.Atoi(params("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "無効なメッセージIDです"})
+	}
+
+	if err := h.Repo.DeleteMessage(messageID); err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "メッセージが削除されました"})
+}

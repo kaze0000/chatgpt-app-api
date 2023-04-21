@@ -70,6 +70,7 @@ func main() {
 	e.POST("/messages", messageHandler.SendMessageAndSaveResponse)
 	e.GET("/user/:id/messages", messageHandler.GetMessagesAndResponseByUserID)
 	e.PUT("/messages/:id", messageHandler.UpdateMessageContent)
+	e.DELETE("/messages/:id", messageHandler.DeleteMessage)
 
 	e.Start(":" + "8080")
 }

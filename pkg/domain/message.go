@@ -28,4 +28,5 @@ type MessageRepository interface {
 	GetMessagesByUserID(userID int) ([]*Message, error)
 	GetResponseByMessageID(messageID int) (*Response, error)
 	UpdateMessageContent(messageID int, content string) error
+	DeleteMessage(messageID int) error
 }
