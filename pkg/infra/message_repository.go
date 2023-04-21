@@ -67,3 +67,14 @@ func (r *messageRepository) GetResponseByMessageID(messageID int) (*domain.Respo
 	}
 	return response, nil
 }
+
+func (r *messageRepository) UpdateMessageContent(messageID int, content string) error {
+	stmt, err := r.db.Prepare("UPDATE messages SET content = ? WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(content, messageID)
+	return err
+}

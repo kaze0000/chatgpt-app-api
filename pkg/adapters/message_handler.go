@@ -50,15 +50,7 @@ func (h *MessageHandler) GetMessagesAndResponseByUserID(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "メッセージの取得に失敗しました"})
 	}
 
-	// domainに切り出したほうがいい。そもそもapiからレスポンスをResponseで定義したのがミス
-	type MessageWithResponse struct {
-		ID int `json:"id"`
-		Content string `json:"content"`
-		UserID int `json:"user_id"`
-		Response *domain.Response `json:"response"`
-	}
-
-	var messagesWithResponse []*MessageWithResponse
+	var messagesWithResponse []*domain.MessageWithResponse
 
 	for _, m := range messages {
 		response, err := h.Repo.GetResponseByMessageID(m.ID)
@@ -66,7 +58,7 @@ func (h *MessageHandler) GetMessagesAndResponseByUserID(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "レスポンスの取得に失敗しました"})
 		}
 		if response != nil {
-			messageWithResponse := &MessageWithResponse{
+			messageWithResponse := &domain.MessageWithResponse{
 				ID: m.ID,
 				Content: m.Content,
 				UserID: m.UserID,
@@ -79,4 +71,26 @@ func (h *MessageHandler) GetMessagesAndResponseByUserID(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"messages": messagesWithResponse,
 	})
+}
+
+func (h *MessageHandler) UpdateMessageContent(c echo.Context) error {
+	params := c.Param
+	messageID, err := strconv.Atoi(params("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "無効なメッセージIDです"})
+	}
+
+	var updatedMessage struct {
+		Content string `json:"content"`
+	}
+
+	if err := c.Bind(&updatedMessage); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	if err := h.Repo.UpdateMessageContent(messageID, updatedMessage.Content); err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "メッセージの内容が更新されました"})
 }

@@ -12,6 +12,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// 今handlerがusrcaseに依存しているので、
+// IxxUsecaseをつくってDIしてもいいかも
 type UserHandler struct {
 	UserRepo domain.UserRepository
 }

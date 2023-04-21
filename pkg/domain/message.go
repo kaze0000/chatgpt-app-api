@@ -12,6 +12,13 @@ type Response struct {
 	Content   string `json:"content"`
 }
 
+type MessageWithResponse struct {
+		ID int `json:"id"`
+		Content string `json:"content"`
+		UserID int `json:"user_id"`
+		Response *Response `json:"response"`
+}
+
 type MessageRepository interface {
 	StoreMessage(m *Message) error
 	StoreResponse(r *Response) error
@@ -20,4 +27,5 @@ type MessageRepository interface {
 	// GetResponses(messageID int) ([]*Response, error)
 	GetMessagesByUserID(userID int) ([]*Message, error)
 	GetResponseByMessageID(messageID int) (*Response, error)
+	UpdateMessageContent(messageID int, content string) error
 }
