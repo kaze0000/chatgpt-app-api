@@ -6,8 +6,8 @@ import (
 	"go-app/pkg/usecase"
 	"net/http"
 	"os"
+	"time"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 )
@@ -48,17 +48,17 @@ func (h *UserHandler) Login(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
+	// tokenをser-cookieに入れる
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = token
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	cookie.Path = "/"
+	cookie.Domain = os.Getenv("API_DOMAIN")
+	// cookie.Secure = true
+	cookie.HttpOnly = true
+	cookie.SameSite = http.SameSiteNoneMode
+	c.SetCookie(cookie)
 
 	return c.JSON(http.StatusOK, token)
-}
-
-func (h *UserHandler) ProtectedEndpoint(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(*usecase.JWTClaims) // userは、認証済みのユーザーに関する情報を持つ *jwt.Token 型の変数
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "認証に成功しました",
-		"user_id": claims.UserID,
-		"name":    claims.Name,
-	})
 }

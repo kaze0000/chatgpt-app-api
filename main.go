@@ -60,17 +60,14 @@ func main() {
 	// authorized
 	authorized := e.Group("")
 	authorized.Use(jWTMiddleware)
-	authorized.GET("/test", userHandler.ProtectedEndpoint)
-
-	// messge
+	// messges
 	chatGPTAPI := infra.NewChatGPTAPI(os.Getenv("chatGPTAPIKey"))
-
 	messageRepo := infra.NewMessageRepository(db)
 	messageHandler := &adapters.MessageHandler{Repo: messageRepo, ChatGPTAPI: chatGPTAPI}
-	e.POST("/messages", messageHandler.SendMessageAndSaveResponse)
-	e.GET("/user/:id/messages", messageHandler.GetMessagesAndResponseByUserID)
-	e.PUT("/messages/:id", messageHandler.UpdateMessageContent)
-	e.DELETE("/messages/:id", messageHandler.DeleteMessage)
+	authorized.POST("/messages", messageHandler.SendMessageAndSaveResponse)
+	authorized.GET("/messages", messageHandler.GetMessagesAndResponseByUserID)
+	authorized.PUT("/messages/:id", messageHandler.UpdateMessageContent)
+	authorized.DELETE("/messages/:id", messageHandler.DeleteMessage)
 
 	e.Start(":" + "8080")
 }

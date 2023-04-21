@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -38,11 +39,9 @@ func (h *MessageHandler) SendMessageAndSaveResponse(c echo.Context) error {
 }
 
 func (h *MessageHandler) GetMessagesAndResponseByUserID(c echo.Context) error {
-	params := c.Param
-	userID, err := strconv.Atoi(params("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "無効なユーザーIDです"})
-	}
+	user := c.Get("user").(*jwt.Token)
+  claims := user.Claims.(*usecase.JWTClaims)
+  userID := claims.UserID
 
 	messages, err := h.Repo.GetMessagesByUserID(userID)
 
