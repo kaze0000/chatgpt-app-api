@@ -6,12 +6,6 @@ type Message struct {
 	UserID		int    `json:"user_id"`
 }
 
-type Response struct {
-	ID        int    `json:"id"`
-	MessageID int `json:"message_id"`
-	Content   string `json:"content"`
-}
-
 type MessageWithResponse struct {
 		ID int `json:"id"`
 		Content string `json:"content"`
@@ -19,7 +13,7 @@ type MessageWithResponse struct {
 		Response *Response `json:"response"`
 }
 
-type MessageRepository interface {
+type IMessageRepository interface {
 	StoreMessage(m *Message) error
 	StoreResponse(r *Response) error
 	// TODO: 必要あれば実装する

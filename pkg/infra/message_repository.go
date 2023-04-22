@@ -9,7 +9,7 @@ type messageRepository struct {
 	db *sql.DB
 }
 
-func NewMessageRepository(db *sql.DB) domain.MessageRepository {
+func NewMessageRepository(db *sql.DB) domain.IMessageRepository {
 	return &messageRepository{db: db}
 }
 
