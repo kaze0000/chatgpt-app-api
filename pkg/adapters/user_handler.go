@@ -5,8 +5,6 @@ import (
 	"go-app/pkg/domain"
 	"go-app/pkg/usecase"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -45,20 +43,11 @@ func (h *UserHandler) Login(c echo.Context) error {
 		return err
 	}
 
-	token, err := h.uu.AuthenticateUser(req.Email, req.Password)
+	token, cookie, err := h.uu.AuthenticateUser(req.Email, req.Password)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
-	// tokenをset-cookieに入れる
-	cookie := new(http.Cookie)
-	cookie.Name = "token"
-	cookie.Value = token
-	cookie.Expires = time.Now().Add(24 * time.Hour)
-	cookie.Path = "/"
-	cookie.Domain = os.Getenv("API_DOMAIN")
-	// cookie.Secure = true
-	cookie.HttpOnly = true
-	cookie.SameSite = http.SameSiteNoneMode
+
 	c.SetCookie(cookie)
 
 	return c.JSON(http.StatusOK, token)

@@ -2,6 +2,9 @@ package usecase
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -10,7 +13,7 @@ import (
 
 type IUserUsecase interface {
 	StoreUser(user *domain.User) error
-	AuthenticateUser(email, password string) (string, error)
+	AuthenticateUser(email, password string) (string, *http.Cookie, error)
 }
 
 type userUsecase struct {
@@ -42,25 +45,38 @@ func (u *userUsecase) StoreUser(user *domain.User) error {
 	return u.repo.Store(user)
 }
 
-func (u *userUsecase) AuthenticateUser(email, password string) (string, error) {
+func (u *userUsecase) AuthenticateUser(email, password string) (string, *http.Cookie, error) {
 	user, err := u.repo.FindByEmail(email)
 
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	if user == nil {
-		return "", fmt.Errorf("user not found")
+		return "", nil, fmt.Errorf("user not found")
 	}
 
+	// パスワードの比較
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
+	// トークンの生成
 	token, err := GenerateJWT(user, u.secretKey)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return token, nil
+	// tokenをset-cookieに入れる
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = token
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	cookie.Path = "/"
+	cookie.Domain = os.Getenv("API_DOMAIN")
+	// cookie.Secure = true
+	cookie.HttpOnly = true
+	cookie.SameSite = http.SameSiteNoneMode
+
+	return token, cookie, nil
 }
