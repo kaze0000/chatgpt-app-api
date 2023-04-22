@@ -11,11 +11,12 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 )
-
-// 今handlerがusrcaseに依存しているので、
-// IxxUsecaseをつくってDIしてもいいかも
 type UserHandler struct {
-	UserRepo domain.UserRepository
+	uu usecase.IUserUsecase
+}
+
+func NewUserHandler(uu usecase.IUserUsecase) *UserHandler {
+	return &UserHandler{uu}
 }
 
 func (h *UserHandler) Register(c echo.Context) error {
@@ -24,7 +25,7 @@ func (h *UserHandler) Register(c echo.Context) error {
 		return err
 	}
 
-	err := usecase.StoreUser(user, h.UserRepo)
+	err := h.uu.StoreUser(user)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -44,11 +45,11 @@ func (h *UserHandler) Login(c echo.Context) error {
 		return err
 	}
 
-	token, err := usecase.AuthenticateUser(req.Email, req.Password, h.UserRepo, os.Getenv("jwtSecretKey"))
+	token, err := h.uu.AuthenticateUser(req.Email, req.Password)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
-	// tokenをser-cookieに入れる
+	// tokenをset-cookieに入れる
 	cookie := new(http.Cookie)
 	cookie.Name = "token"
 	cookie.Value = token

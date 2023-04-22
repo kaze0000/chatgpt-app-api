@@ -7,7 +7,7 @@ type User struct {
 	Password string `json:"password"`
 }
 
-type UserRepository interface {
+type IUserRepository interface {
 	Store(u *User) error
 	FindByEmail(email string) (*User, error)
 }

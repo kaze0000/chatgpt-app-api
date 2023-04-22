@@ -8,6 +8,19 @@ import (
 	"go-app/pkg/domain"
 )
 
+type IUserUsecase interface {
+	StoreUser(user *domain.User) error
+	AuthenticateUser(email, password string) (string, error)
+}
+
+type userUsecase struct {
+	repo			domain.IUserRepository
+	secretKey	string
+}
+
+func NewUserUsecase(repo domain.IUserRepository, secretKey string) IUserUsecase {
+	return &userUsecase{repo: repo, secretKey: secretKey}
+}
 
 func hashPassword(password string) (string, error) {
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), 4)
@@ -18,7 +31,7 @@ func hashPassword(password string) (string, error) {
 	return string(hashPassword), nil
 }
 
-func StoreUser(user *domain.User, repo domain.UserRepository) error {
+func (u *userUsecase) StoreUser(user *domain.User) error {
 	hashPassword, err := hashPassword(user.Password)
 	if err != nil {
 		return err
@@ -26,11 +39,11 @@ func StoreUser(user *domain.User, repo domain.UserRepository) error {
 
 	user.Password = hashPassword
 
-	return repo.Store(user)
+	return u.repo.Store(user)
 }
 
-func AuthenticateUser(email, password string, repo domain.UserRepository, secretKey string) (string, error) {
-	user, err := repo.FindByEmail(email)
+func (u *userUsecase) AuthenticateUser(email, password string) (string, error) {
+	user, err := u.repo.FindByEmail(email)
 
 	if err != nil {
 		return "", err
@@ -44,7 +57,7 @@ func AuthenticateUser(email, password string, repo domain.UserRepository, secret
 		return "", err
 	}
 
-	token, err := GenerateJWT(user, secretKey)
+	token, err := GenerateJWT(user, u.secretKey)
 	if err != nil {
 		return "", err
 	}

@@ -6,6 +6,7 @@ import (
 	"go-app/pkg/adapters"
 	"go-app/pkg/adapters/middleware"
 	"go-app/pkg/infra"
+	"go-app/pkg/usecase"
 	"log"
 	"os"
 	"time"
@@ -52,7 +53,8 @@ func main() {
 	jWTMiddleware := middleware.JWTMiddleware(os.Getenv("jwtSecretKey"))
 
 	userRepo := infra.NewUserRepository(db)
-	userHandler := &adapters.UserHandler{UserRepo: userRepo}
+	userUsecase := usecase.NewUserUsecase(userRepo, os.Getenv("jwtSecretKey"))
+	userHandler := adapters.NewUserHandler(userUsecase)
 
 	e.POST("/register", userHandler.Register)
 	e.POST("/login", userHandler.Login)
