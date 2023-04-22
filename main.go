@@ -53,8 +53,13 @@ func main() {
 
 	e := echo.New()
 
+	// profiles
+	profileRepo := infra.NewProfileRepository(db)
+	profileUsecase := usecase.NewProfileUsecase(profileRepo)
 	// graphql
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+		ProfileUsecase: profileUsecase,
+	}}))
 	e.POST("/query", func(c echo.Context) error {
 		srv.ServeHTTP(c.Response(), c.Request())
 		return nil
@@ -87,5 +92,5 @@ func main() {
 	ownershipGroup.PUT("/messages/:id", messageHandler.UpdateMessageContent)
 	ownershipGroup.DELETE("/messages/:id", messageHandler.DeleteMessage)
 
-	e.Start(":" + "8080")
+	e.Logger.Fatal(e.Start(":" + "8080"))
 }

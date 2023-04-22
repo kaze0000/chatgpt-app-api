@@ -8,19 +8,26 @@ import (
 	"context"
 	"errors"
 	"go-app/graph/model"
+	"go-app/pkg/domain"
 )
 
 // CreateProfile is the resolver for the createProfile field.
 func (r *mutationResolver) CreateProfile(ctx context.Context, input model.ProfileInput) (*model.Profile, error) {
-	// データベースにユーザープロファイルを保存するロジックを実装。
-	// ここではダミーデータを使用。
-	profile := &model.Profile{
-		ID:     "2",
-		UserID: "1",
-		Hobby:  "soccer",
+	profile := &domain.Profile{
+		UserID: input.UserID,
+		Hobby:  input.Hobby,
 	}
 
-	return profile, nil
+	createdProfile, err := r.ProfileUsecase.CreateProfile(profile)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Profile{
+		ID:     string(createdProfile.ID),
+		UserID: string(createdProfile.UserID),
+		Hobby:  createdProfile.Hobby,
+	}, nil
 }
 
 // Profile is the resolver for the profile field.
