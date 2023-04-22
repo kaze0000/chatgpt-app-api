@@ -25,6 +25,12 @@ func (h *MessageHandler) SendMessageAndSaveResponse(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
+	user := c.Get("user").(*jwt.Token)
+  claims := user.Claims.(*usecase.JWTClaims)
+  userID := claims.UserID
+
+	message.UserID = userID
+
 	messageWithResponse, err := h.mu.SendMessageAndSaveResponse(message)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

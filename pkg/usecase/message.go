@@ -1,6 +1,8 @@
 package usecase
 
-import "go-app/pkg/domain"
+import (
+	"go-app/pkg/domain"
+)
 
 type IMessageUsecase interface {
 	SendMessageAndSaveResponse(message *domain.Message) (*domain.MessageWithResponse, error)
@@ -22,15 +24,18 @@ func NewMessageUsecase(mr domain.IMessageRepository, cg IChatGPTAPIClient) IMess
 }
 
 func (u *messageUsecase) SendMessageAndSaveResponse(message *domain.Message) (*domain.MessageWithResponse, error) {
-	if err := u.mr.StoreMessage(message); err != nil {
+	messageID, err := u.mr.StoreMessage(message)
+	if err != nil {
 		return nil, err
 	}
+	message.ID = messageID
 
 	res, err := u.cg.SendMessage(message)
 	if err != nil {
 		return nil, err
 	}
 
+	res.MessageID = messageID
 	if err = u.mr.StoreResponse(res); err != nil {
 		return nil, err
 	}

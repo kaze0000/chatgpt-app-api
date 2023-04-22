@@ -13,16 +13,21 @@ func NewMessageRepository(db *sql.DB) domain.IMessageRepository {
 	return &messageRepository{db: db}
 }
 
-func (r *messageRepository) StoreMessage(m *domain.Message) error {
+func (r *messageRepository) StoreMessage(m *domain.Message) (int, error) {
 	stmt, err := r.db.Prepare("INSERT INTO messages (content, user_id) VALUES (?, ?)")
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(m.Content, m.UserID)
+	result, err := stmt.Exec(m.Content, m.UserID)
+	if err != nil {
+		return 0 ,nil
+	}
 
-	return err
+	id, err := result.LastInsertId()
+
+	return int(id), err
 }
 
 // chat gptからのレスポンスを保存するところ

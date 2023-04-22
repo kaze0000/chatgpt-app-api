@@ -14,7 +14,7 @@ type MessageWithResponse struct {
 }
 
 type IMessageRepository interface {
-	StoreMessage(m *Message) error
+	StoreMessage(m *Message) (int, error)
 	StoreResponse(r *Response) error
 	// TODO: 必要あれば実装する
 	// GetMessages() ([]*Message, error)
