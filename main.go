@@ -51,14 +51,12 @@ func main() {
 	e := echo.New()
 
 	jWTMiddleware := middleware.JWTMiddleware(os.Getenv("jwtSecretKey"))
-
+	// users
 	userRepo := infra.NewUserRepository(db)
 	userUsecase := usecase.NewUserUsecase(userRepo, os.Getenv("jwtSecretKey"))
 	userHandler := adapters.NewUserHandler(userUsecase)
-
 	e.POST("/register", userHandler.Register)
 	e.POST("/login", userHandler.Login)
-
 	// authorized
 	authorized := e.Group("")
 	authorized.Use(jWTMiddleware)
@@ -69,8 +67,11 @@ func main() {
 	messageHandler := adapters.NewMessageHandler(messageUsecase)
 	authorized.POST("/messages", messageHandler.SendMessageAndSaveResponse)
 	authorized.GET("/messages", messageHandler.GetMessagesAndResponseByUserID)
-	authorized.PUT("/messages/:id", messageHandler.UpdateMessageContent)
-	authorized.DELETE("/messages/:id", messageHandler.DeleteMessage)
+  // messageOwnership
+	ownershipGroup := authorized.Group("")
+	ownershipGroup.Use(middleware.CheckMessageOwnership(messageUsecase))
+	ownershipGroup.PUT("/messages/:id", messageHandler.UpdateMessageContent)
+	ownershipGroup.DELETE("/messages/:id", messageHandler.DeleteMessage)
 
 	e.Start(":" + "8080")
 }

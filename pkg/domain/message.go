@@ -19,6 +19,7 @@ type IMessageRepository interface {
 	// TODO: 必要あれば実装する
 	// GetMessages() ([]*Message, error)
 	// GetResponses(messageID int) ([]*Response, error)
+	GetMessageByID(messageID int) (*Message, error)
 	GetMessagesByUserID(userID int) ([]*Message, error)
 	GetResponseByMessageID(messageID int) (*Response, error)
 	UpdateMessageContent(messageID int, content string) error

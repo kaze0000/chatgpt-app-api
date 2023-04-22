@@ -6,6 +6,7 @@ import (
 
 type IMessageUsecase interface {
 	SendMessageAndSaveResponse(message *domain.Message) (*domain.MessageWithResponse, error)
+	GetMessageByID(messageID int) (*domain.Message, error)
 	GetMessagesAndResponseByUserID(userID int) ([]*domain.MessageWithResponse, error)
 	UpdateMessageContent(messageID int, content string) error
 	DeleteMessage(messageID int) error
@@ -76,6 +77,16 @@ func (u *messageUsecase) GetMessagesAndResponseByUserID(userID int) ([]*domain.M
 	}
 
 	return messagesWithResponse, nil
+}
+
+func (u *messageUsecase) GetMessageByID(messageID int) (*domain.Message, error) {
+	message, err := u.mr.GetMessageByID(messageID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return message, nil
 }
 
 func (u *messageUsecase) UpdateMessageContent(messageID int, content string) error {

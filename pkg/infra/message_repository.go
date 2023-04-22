@@ -62,6 +62,17 @@ func (r *messageRepository) GetMessagesByUserID(userID int) ([]*domain.Message, 
 	return messages, nil
 }
 
+func (r *messageRepository) GetMessageByID(messageID int) (*domain.Message, error) {
+	row := r.db.QueryRow("SELECT id, content, user_id FROM messages WHERE id = ?", messageID)
+
+	message := &domain.Message{}
+	err := row.Scan(&message.ID, &message.Content, &message.UserID)
+	if  err != nil {
+		return nil, err
+	}
+	return message, nil
+}
+
 func (r *messageRepository) GetResponseByMessageID(messageID int) (*domain.Response, error) {
 	row := r.db.QueryRow("SELECT id, message_id, content FROM responses WHERE message_id = ?", messageID)
 
