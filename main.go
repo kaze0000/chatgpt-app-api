@@ -63,9 +63,10 @@ func main() {
 	authorized := e.Group("")
 	authorized.Use(jWTMiddleware)
 	// messges
-	chatGPTAPI := infra.NewChatGPTAPI(os.Getenv("chatGPTAPIKey"))
+	chatGPTAPI := infra.NewChatGPTAPIClient(os.Getenv("chatGPTAPIKey"))
 	messageRepo := infra.NewMessageRepository(db)
-	messageHandler := &adapters.MessageHandler{Repo: messageRepo, ChatGPTAPI: chatGPTAPI}
+	messageUsecase := usecase.NewMessageUsecase(messageRepo, chatGPTAPI)
+	messageHandler := adapters.NewMessageHandler(messageUsecase)
 	authorized.POST("/messages", messageHandler.SendMessageAndSaveResponse)
 	authorized.GET("/messages", messageHandler.GetMessagesAndResponseByUserID)
 	authorized.PUT("/messages/:id", messageHandler.UpdateMessageContent)

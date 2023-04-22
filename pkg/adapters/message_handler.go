@@ -11,9 +11,12 @@ import (
 )
 
 type MessageHandler struct {
-	Repo domain.MessageRepository
-	ChatGPTAPI usecase.ChatGPTAPI
+	mu usecase.IMessageUsecase
 	// handlerはそれぞれのインターフェイスを介して処理を実行するだけ
+}
+
+func NewMessageHandler(mu usecase.IMessageUsecase) *MessageHandler {
+	return &MessageHandler{mu}
 }
 
 func (h *MessageHandler) SendMessageAndSaveResponse(c echo.Context) error {
@@ -22,20 +25,12 @@ func (h *MessageHandler) SendMessageAndSaveResponse(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	if err := h.Repo.StoreMessage(message); err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-
-	res, err := h.ChatGPTAPI.SendMessage(message)
+	messageWithResponse, err := h.mu.SendMessageAndSaveResponse(message)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	if err = h.Repo.StoreResponse(res); err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-
-	return c.JSON(http.StatusOK, res)
+	return c.JSON(http.StatusOK, messageWithResponse)
 }
 
 func (h *MessageHandler) GetMessagesAndResponseByUserID(c echo.Context) error {
@@ -43,28 +38,9 @@ func (h *MessageHandler) GetMessagesAndResponseByUserID(c echo.Context) error {
   claims := user.Claims.(*usecase.JWTClaims)
   userID := claims.UserID
 
-	messages, err := h.Repo.GetMessagesByUserID(userID)
-
+	messagesWithResponse, err := h.mu.GetMessagesAndResponseByUserID(userID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "メッセージの取得に失敗しました"})
-	}
-
-	var messagesWithResponse []*domain.MessageWithResponse
-
-	for _, m := range messages {
-		response, err := h.Repo.GetResponseByMessageID(m.ID)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "レスポンスの取得に失敗しました"})
-		}
-		if response != nil {
-			messageWithResponse := &domain.MessageWithResponse{
-				ID: m.ID,
-				Content: m.Content,
-				UserID: m.UserID,
-				Response: response,
-			}
-			messagesWithResponse = append(messagesWithResponse, messageWithResponse)
-		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "メッセージとレスポンスの取得に失敗しました"})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -83,11 +59,11 @@ func (h *MessageHandler) UpdateMessageContent(c echo.Context) error {
 		Content string `json:"content"`
 	}
 
-	if err := c.Bind(&updatedMessage); err != nil {
+	if err := c.Bind(&updatedMessage); err != nil { // c.Bind: リクエストデータを検証してから、ビジネスロジックを実行
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	if err := h.Repo.UpdateMessageContent(messageID, updatedMessage.Content); err != nil {
+	if err := h.mu.UpdateMessageContent(messageID, updatedMessage.Content); err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
@@ -101,7 +77,7 @@ func (h *MessageHandler) DeleteMessage(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "無効なメッセージIDです"})
 	}
 
-	if err := h.Repo.DeleteMessage(messageID); err != nil {
+	if err := h.mu.DeleteMessage(messageID); err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 

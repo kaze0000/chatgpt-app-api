@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"go-app/pkg/domain"
+	"go-app/pkg/usecase"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -11,15 +12,15 @@ import (
 
 const openaiURL = "https://api.openai.com/v1/completions"
 
-type ChatGPTAPI struct {
-	ApiKey string
+type chatGPTAPIClient struct {
+	apiKey string
 }
 
-func NewChatGPTAPI(apiKey string) *ChatGPTAPI {
-	return &ChatGPTAPI{ApiKey: apiKey}
+func NewChatGPTAPIClient(apiKey string) usecase.IChatGPTAPIClient {
+	return &chatGPTAPIClient{apiKey: apiKey}
 }
 
-func (api *ChatGPTAPI) SendMessage(message *domain.Message) (*domain.Response, error) {
+func (api *chatGPTAPIClient) SendMessage(message *domain.Message) (*domain.Response, error) {
 	client := &http.Client{}
 	data := map[string]interface{}{
 		"model":      "text-davinci-003",
@@ -39,7 +40,7 @@ func (api *ChatGPTAPI) SendMessage(message *domain.Message) (*domain.Response, e
 		return nil, err
 	}
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.Header.Set(echo.HeaderAuthorization, "Bearer " + api.ApiKey)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer " + api.apiKey)
 	res, err := client.Do(req)
 
 	if err != nil {
@@ -77,5 +78,7 @@ func (api *ChatGPTAPI) SendMessage(message *domain.Message) (*domain.Response, e
   // ],
 	text := choices[0].(map[string]interface{})["text"].(string)
 
-	return &domain.Response{MessageID: message.ID, Content: text}, nil
+	response := &domain.Response{MessageID: message.ID, Content: text}
+
+	return response, nil
 }
