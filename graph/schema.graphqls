@@ -1,0 +1,22 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Profile {
+  id: ID!
+  userId: String!
+  hobby: String!
+}
+
+type Query {
+  profile(userId: ID!): Profile!
+}
+
+input ProfileInput {
+  userId: Int!
+  hobby: String!
+}
+
+type Mutation {
+  createProfile(input: ProfileInput!): Profile
+}
