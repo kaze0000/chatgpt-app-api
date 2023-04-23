@@ -4,7 +4,7 @@
 
 type Profile {
   id: ID!
-  userId: String!
+  userId: ID!
   hobby: String!
 }
 
@@ -13,7 +13,7 @@ type Query {
 }
 
 input ProfileInput {
-  userId: Int!
+  userId: ID!
   hobby: String!
 }
 

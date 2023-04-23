@@ -8,4 +8,5 @@ type Profile struct {
 
 type IProfileRepository interface {
 	CreateProfile(profile *Profile) (*Profile, error)
+	GetProfileByUserID(userID int) (*Profile, error)
 }

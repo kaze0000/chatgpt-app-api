@@ -6,15 +6,16 @@ package graph
 
 import (
 	"context"
-	"errors"
 	"go-app/graph/model"
 	"go-app/pkg/domain"
+	"strconv"
 )
 
 // CreateProfile is the resolver for the createProfile field.
 func (r *mutationResolver) CreateProfile(ctx context.Context, input model.ProfileInput) (*model.Profile, error) {
+	UserID, err := strconv.Atoi(input.UserID)
 	profile := &domain.Profile{
-		UserID: input.UserID,
+		UserID:  UserID,
 		Hobby:  input.Hobby,
 	}
 
@@ -32,19 +33,17 @@ func (r *mutationResolver) CreateProfile(ctx context.Context, input model.Profil
 
 // Profile is the resolver for the profile field.
 func (r *queryResolver) Profile(ctx context.Context, userID string) (*model.Profile, error) {
-	// データベースからユーザープロファイルを取得するロジックを実装。
-	// とりあえずダミーデータ返す
-	profile := &model.Profile{
-		ID:     "1",
-		UserID: "1",
-		Hobby:  "ゲーム",
+	UserID, err := strconv.Atoi(userID)
+	profile, err := r.ProfileUsecase.GetProfileByUserID(UserID)
+	if err != nil {
+		return nil, err
 	}
 
-	if profile.UserID == userID {
-		return profile, nil
-	}
-
-	return nil, errors.New("profile not found")
+	return &model.Profile{
+		ID:     string(profile.ID),
+		UserID: string(profile.UserID),
+		Hobby:  profile.Hobby,
+	}, nil
 }
 
 // Mutation returns MutationResolver implementation.

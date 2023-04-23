@@ -9,6 +9,6 @@ type Profile struct {
 }
 
 type ProfileInput struct {
-	UserID int    `json:"userId"`
+	UserID string `json:"userId"`
 	Hobby  string `json:"hobby"`
 }

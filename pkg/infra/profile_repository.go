@@ -34,3 +34,14 @@ func (r *profileRepository) CreateProfile(p *domain.Profile) (*domain.Profile, e
 	return p, err
 }
 
+func (r *profileRepository) GetProfileByUserID(userID int) (*domain.Profile, error) {
+	row := r.db.QueryRow("SELECT id, user_id, hobby FROM profiles WHERE user_id = ?", userID)
+
+	profile := &domain.Profile{}
+	err := row.Scan(&profile.ID, &profile.UserID, &profile.Hobby)
+	if err != nil {
+		return nil, err
+	}
+
+	return profile, nil
+}
