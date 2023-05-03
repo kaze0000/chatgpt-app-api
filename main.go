@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"go-app/graph"
 	"go-app/pkg/adapters"
 	"go-app/pkg/adapters/middleware"
 	"go-app/pkg/infra"
@@ -11,6 +12,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -50,6 +53,22 @@ func main() {
 
 	e := echo.New()
 
+	// profiles
+	profileRepo := infra.NewProfileRepository(db)
+	profileUsecase := usecase.NewProfileUsecase(profileRepo)
+	// graphql
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+		ProfileUsecase: profileUsecase,
+	}}))
+	e.POST("/query", func(c echo.Context) error {
+		srv.ServeHTTP(c.Response(), c.Request())
+		return nil
+	})
+	e.GET("/playground", func(c echo.Context) error {
+		playground.Handler("GraphQL playground", "/query").ServeHTTP(c.Response(), c.Request())
+		return nil
+	})
+
 	jWTMiddleware := middleware.JWTMiddleware(os.Getenv("jwtSecretKey"))
 	// users
 	userRepo := infra.NewUserRepository(db)
@@ -73,5 +92,5 @@ func main() {
 	ownershipGroup.PUT("/messages/:id", messageHandler.UpdateMessageContent)
 	ownershipGroup.DELETE("/messages/:id", messageHandler.DeleteMessage)
 
-	e.Start(":" + "8080")
+	e.Logger.Fatal(e.Start(":" + "8080"))
 }
