@@ -17,6 +17,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	md "github.com/labstack/echo/v4/middleware"
 )
 
 func open(path string, count uint) *sql.DB {
@@ -52,6 +53,13 @@ func main() {
 	}
 
 	e := echo.New()
+
+	// cors
+	CORSMiddleware := middleware.CORSMiddleware(os.Getenv("FE_URL"))
+	e.Use(CORSMiddleware)
+	// csrf
+	// CSRFMiddleware := middleware.CSRFMiddleware(os.Getenv("API_DOMAIN"))
+	// e.Use(CSRFMiddleware)
 
 	// profiles
 	profileRepo := infra.NewProfileRepository(db)
@@ -92,5 +100,6 @@ func main() {
 	ownershipGroup.PUT("/messages/:id", messageHandler.UpdateMessageContent)
 	ownershipGroup.DELETE("/messages/:id", messageHandler.DeleteMessage)
 
+	e.Use(md.Logger())
 	e.Logger.Fatal(e.Start(":" + "8080"))
 }

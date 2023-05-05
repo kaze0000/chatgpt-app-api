@@ -26,7 +26,7 @@ func (api *chatGPTAPIClient) SendMessage(message *domain.Message) (*domain.Respo
 		"model":      "text-davinci-003",
 		"prompt":     message.Content,
 		// "max_tokens": 50,
-		"max_tokens": 5,
+		"max_tokens": 15,
 	}
 
 	payload, err := json.Marshal(data)	// HTTPリクエストのボディに設定するデータ
