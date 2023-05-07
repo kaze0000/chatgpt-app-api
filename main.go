@@ -70,10 +70,14 @@ func main() {
 
 	e := echo.New()
 
+	// top page
+	e.GET("/", func(c echo.Context) error {
+    return c.JSON(http.StatusOK, map[string]string{"message": "here is top page"})
+	})
 	// health check
 	e.GET("/health", func(c echo.Context) error {
     return c.JSON(http.StatusOK, map[string]string{"status": "OK"})
-})
+	})
 
 	// cors
 	CORSMiddleware := middleware.CORSMiddleware(os.Getenv("FE_URL"))
