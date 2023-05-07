@@ -9,6 +9,7 @@ import (
 	"go-app/pkg/infra"
 	"go-app/pkg/usecase"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -68,6 +69,11 @@ func main() {
 	}
 
 	e := echo.New()
+
+	// health check
+	e.GET("/health", func(c echo.Context) error {
+    return c.JSON(http.StatusOK, map[string]string{"status": "OK"})
+})
 
 	// cors
 	CORSMiddleware := middleware.CORSMiddleware(os.Getenv("FE_URL"))
