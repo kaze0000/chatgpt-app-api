@@ -27,6 +27,7 @@ func open(path string, count uint) *sql.DB {
 	}
 
 	if err := db.Ping(); err != nil {
+		fmt.Printf("db.Ping() error: %v\n", err)
 		time.Sleep(time.Second* 2)
 		count --
 		fmt.Printf("retry... count:%v\n", count)
@@ -38,8 +39,20 @@ func open(path string, count uint) *sql.DB {
 }
 
 func connectDB() *sql.DB {
-	var path string = fmt.Sprintf("%s:%s@tcp(db:3306)/%s?charset=utf8&parseTime=true",
-		os.Getenv("MYSQL_USER"),os.Getenv("MYSQL_PASSWORD"),os.Getenv("MYSQL_DATABASE"))
+	dbUser := "test_user"
+	dbPass := "password"
+	dbAddress := "db"
+	dbName := "test_database"
+
+	if os.Getenv("DB_ENV") == "production" {
+		dbUser = os.Getenv("DB_USER")
+		dbPass = os.Getenv("DB_PASSWORD")
+		dbAddress = os.Getenv("DB_ADDRESS")
+		dbName = os.Getenv("DB_NAME")
+	}
+
+	var path string = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8&parseTime=true",
+																dbUser,dbPass,dbAddress,dbName)
 	return open(path, 100)
 }
 
@@ -47,9 +60,11 @@ func main() {
 	db := connectDB()
 	defer db.Close()
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if os.Getenv("DB_ENV") != "production" {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 
 	e := echo.New()
