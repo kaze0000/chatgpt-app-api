@@ -17,6 +17,8 @@ phases:
       - echo Pushing the Docker image...
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Writing image definitions file...
-      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      # ECS+CodeDeployにどのイメージを使用するか指示するためのファイルを作成
+      - printf '{"Version":"1.0","ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
 artifacts:
-  files: imagedefinitions.json
+  # buildの最後で作成したファイルをアーティファクトとして流す
+  files: imageDetail.json

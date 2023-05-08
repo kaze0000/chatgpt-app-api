@@ -1,0 +1,22 @@
+{
+  "executionRoleArn": "arn:aws:iam::617678187836:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "go-app-task-definition",
+      "image": "<IMAGE1_NAME>",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "family": "go-app-task-definition"
+}
