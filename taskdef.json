@@ -11,7 +11,47 @@
           "protocol": "tcp"
         }
       ],
-      "essential": true
+      "essential": true,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/go-app-logs",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "environment": [
+        {
+          "name": "DB_ENV",
+          "value": "production"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "jwtSecretKey",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:617678187836:secret:JWT_SECRET_KEY-mFkms7:JWT_SECRET_KEY::"
+        },
+        {
+          "name": "chatGPTAPIKey",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:617678187836:secret:chat_gpt_api_key-hkJUEb:chatGPTAPIKey::"
+        },
+        {
+          "name": "DB_ADDRESS",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:617678187836:secret:DB_ADDRESS-goQbH7:DB_ADDRESS::"
+        },
+        {
+          "name": "DB_NAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:617678187836:secret:DB_NAME-bycMWM:DB_NAME::"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:617678187836:secret:DB_PASSWORD-0o4Xxy:DB_PASSWORD::"
+        },
+        {
+          "name": "DB_USER",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:617678187836:secret:DB_USER-RueAbZ:DB_USER::"
+        }
+      ]
     }
   ],
   "requiresCompatibilities": ["FARGATE"],
