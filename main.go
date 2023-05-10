@@ -45,7 +45,10 @@ func connectDB() *sql.DB {
 	dbAddress := "db"
 	dbName := "test_database"
 
+	fmt.Println("dbAddress", dbAddress)
+	fmt.Println("dbenv", os.Getenv("DB_ENV"))
 	if os.Getenv("DB_ENV") == "production" {
+		fmt.Println("production!!")
 		dbUser = os.Getenv("DB_USER")
 		dbPass = os.Getenv("DB_PASSWORD")
 		dbAddress = os.Getenv("DB_ADDRESS")
