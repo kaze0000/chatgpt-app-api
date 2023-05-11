@@ -50,6 +50,14 @@
         {
           "name": "DB_USER",
           "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:617678187836:secret:DB_USER-RueAbZ:DB_USER::"
+        },
+        {
+          "name": "FE_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:617678187836:secret:FE_URL-uUm0Bk:FE_URL::"
+        },
+        {
+          "name": "API_DOMAIN",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:617678187836:secret:API_DOMAIN-FA5Crs:API_DOMAIN::"
         }
       ]
     }
