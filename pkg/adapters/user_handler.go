@@ -6,7 +6,6 @@ import (
 	"go-app/pkg/usecase"
 	"net/http"
 
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 )
 type UserHandler struct {
@@ -35,11 +34,6 @@ func (h *UserHandler) Register(c echo.Context) error {
 func (h *UserHandler) Login(c echo.Context) error {
 	req := new(domain.LoginRequest)
 	if err := c.Bind(req); err != nil {
-		return err
-	}
-
-	err := godotenv.Load()
-	if err != nil {
 		return err
 	}
 
